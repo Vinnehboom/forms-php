@@ -16,110 +16,134 @@ function whatIsHappening()
     echo '<h2>$_SESSION</h2>';
     var_dump($_SESSION);
 }
-
 //your products with their price.
-$products = [
-    ['name' => 'Club Ham', 'price' => 3.20],
-    ['name' => 'Club Cheese', 'price' => 3],
-    ['name' => 'Club Cheese & Ham', 'price' => 4],
-    ['name' => 'Club Chicken', 'price' => 4],
-    ['name' => 'Club Salmon', 'price' => 5]
-];
 
-$products = [
-    ['name' => 'Cola', 'price' => 2],
-    ['name' => 'Fanta', 'price' => 2],
-    ['name' => 'Sprite', 'price' => 2],
-    ['name' => 'Ice-tea', 'price' => 3],
-];
 
-$totalValue = 0;
 
 require 'form-view.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $_SESSION['error-array'] = [];
+function checkProducts() {
+    $products0 = [
+        ['name' => 'Club Ham', 'price' => 3.20],
+        ['name' => 'Club Cheese', 'price' => 3],
+        ['name' => 'Club Cheese & Ham', 'price' => 4],
+        ['name' => 'Club Chicken', 'price' => 4],
+        ['name' => 'Club Salmon', 'price' => 5]
+    ];
 
-    $email = $_POST['email'];
-    if (empty($email)) {
-        $emailErr = "An email adress is required!";
-        $_SESSION['email-error'] = $emailErr;
-        array_push($_SESSION['error-array'], $emailErr);
+    $products1 = [
+        ['name' => 'Cola', 'price' => 2],
+        ['name' => 'Fanta', 'price' => 2],
+        ['name' => 'Sprite', 'price' => 2],
+        ['name' => 'Ice-tea', 'price' => 3],
+    ];
 
-
+    $products = $products1;
+    $type = $_GET['food'];
+    if ($type == 0) {
+        $products = $products0;
+    } else if($type == 1) {
+        $products = $products1;
     }
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($email)) {
-        $emailErr = "Invalid email format";
-        $_SESSION['email-error'] = $emailErr;
-        array_push($_SESSION['error-array'], $emailErr);
+    return $products;
+}
 
-    }
+function calculatePrice($array) {
+    $valueSpent = 0;
 
-    $street = $_POST['street'];
-    if (empty($street)) {
-        $streetErr = "A street name is required!";
-        $_SESSION['street-error'] = $streetErr;
-        array_push($_SESSION['error-array'], $streetErr);
-
-    }
-    if (!empty($street) && !preg_match("/^[a-zA-Z ]*$/", $street)) {
-        $streetErr = "Street name: only letters and white space allowed";
-        $_SESSION['street-error'] = $streetErr;
-        array_push($_SESSION['error-array'], $streetErr);
-    }
-
-
-    $streetNumber = $_POST['streetnumber'];
-    if (empty($streetNumber)) {
-        $streetnumberErr = "A street number is required!";
-        $_SESSION['number-error'] = $streetnumberErr;
-        array_push($_SESSION['error-array'], $streetnumberErr);
-
-    }
-    if (!empty($streetNumber && !preg_match("/^[0-9]*$/", $streetNumber))) {
-        $streetnumberErr = "Street number: only numbers allowed";
-        $_SESSION['number-error'] = $streetnumberErr;
-        array_push($_SESSION['error-array'], $streetnumberErr);
-    }
-
-    $city = $_POST['city'];
-    if (empty($city)) {
-        $cityErr = "A city name is required!";
-        $_SESSION['city-error'] = $cityErr;
-        array_push($_SESSION['error-array'], $cityErr);
-
-    }
-    if (!empty($city) && !preg_match("/^[a-zA-Z ]*$/", $city)) {
-        $cityErr = "City name: only letters and white space allowed";
-        $_SESSION['city-error'] = $cityErr;
-        array_push($_SESSION['error-array'], $cityErr);
-    }
-
-
-
-    $zip = $_POST['zipcode'];
-    if (empty($zip)) {
-        $zipErr = "A zip code is required!";
-        $_SESSION['zip-error'] = $zipErr;
-        array_push($_SESSION['error-array'], $zipErr);
-
-    }
-    if (!empty($zip) && !preg_match("/^[0-9]*$/", $zip)) {
-        $zipErr = "Zip code: only numbers are allowed";
-        $_SESSION['zip-error'] = $zipErr;
-        array_push($_SESSION['error-array'], $zipErr);
-
-    }
-
-    $_SESSION['message'] = '';
-    if (count($_SESSION['error-array']) > 0) {
-        $_SESSION['message'] .= 'It seems you have made a few mistakes in your form. Please check below for more info:' . '<br/>';
-        foreach ($_SESSION['error-array'] as $error)
-        {
-            $_SESSION['message'] .= $error . '<br/>';
+    foreach($array as $key => $product) {
+        if($_POST['products['.$key.']'] =='1') {
+            $valueSpent += $product['price'];
         }
+    }
+     $_SESSION['total_spent'] = $valueSpent;
+    return $_SESSION['total_spent'];
+}
+
+function calculateDelivery(){
+    date_default_timezone_set('Europe/Brussels');
+    $currentTime = date('H:i:s GMT+1');
+
+    if($_POST['express_delivery'] == '5') {
+        $currentTime = date('H:i', strtotime($currentTime. ' + 45 minutes'));
+
     } else {
-        $_SESSION['message'] = "All information correctly put in, thank you! We will contact you further via email.";
+        $currentTime = date('H:i', strtotime($currentTime. ' + 2 hours'));
+    }
+    echo 'Your delivery will arrive around ' . $currentTime . '.';
+    var_dump($_POST['products[0]']);
+
+}
+
+function postFormvariables() {
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $_SESSION['error-array'] = [];
+
+        $email = $_POST['email'];
+        if (empty($email)) {
+            $emailErr = "An email adress is required!";
+            array_push($_SESSION['error-array'], $emailErr);
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) && !empty($email)) {
+            $emailErr = "Invalid email format";
+            array_push($_SESSION['error-array'], $emailErr);
+        }
+
+        $street = $_POST['street'];
+        if (empty($street)) {
+            $streetErr = "A street name is required!";
+            array_push($_SESSION['error-array'], $streetErr);
+        }
+        if (!empty($street) && !preg_match("/^[a-zA-Z ]*$/", $street)) {
+            $streetErr = "Street name: only letters and white space allowed";
+            $_SESSION['street-error'] = $streetErr;
+            array_push($_SESSION['error-array'], $streetErr);
+        }
+
+
+        $streetNumber = $_POST['streetnumber'];
+        if (empty($streetNumber)) {
+            $streetnumberErr = "A street number is required!";
+            array_push($_SESSION['error-array'], $streetnumberErr);
+        }
+        if (!empty($streetNumber && !preg_match("/^[0-9]*$/", $streetNumber))) {
+            $streetnumberErr = "Street number: only numbers allowed";
+            array_push($_SESSION['error-array'], $streetnumberErr);
+        }
+
+        $city = $_POST['city'];
+        if (empty($city)) {
+            $cityErr = "A city name is required!";
+            array_push($_SESSION['error-array'], $cityErr);
+        }
+        if (!empty($city) && !preg_match("/^[a-zA-Z ]*$/", $city)) {
+            $cityErr = "City name: only letters and white space allowed";
+            array_push($_SESSION['error-array'], $cityErr);
+        }
+
+        $zip = $_POST['zipcode'];
+        if (empty($zip)) {
+            $zipErr = "A zip code is required!";
+            array_push($_SESSION['error-array'], $zipErr);
+        }
+        if (!empty($zip) && !preg_match("/^[0-9]*$/", $zip)) {
+            $zipErr = "Zip code: only numbers are allowed";
+            array_push($_SESSION['error-array'], $zipErr);
+        }
+
+        $_SESSION['message'] = '';
+        if (count($_SESSION['error-array']) > 0) {
+            $_SESSION['message'] .= 'It seems you have made a few mistakes in your form. Please check below for more info:' . '<br/>';
+            foreach ($_SESSION['error-array'] as $error)
+            {
+                $_SESSION['message'] .= $error . '<br/>';
+                echo $_SESSION['message'];
+                session_unset();
+            }
+        } else {
+            echo "All information correctly put in, thank you! We will contact you further via email.";
+            calculateDelivery();
+        }
     }
 }
 

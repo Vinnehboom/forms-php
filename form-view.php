@@ -15,20 +15,18 @@
     <nav>
         <ul class="nav">
             <li class="nav-item">
-                <a class="nav-link active" href="?food=1">Order food</a>
+                <a class="nav-link active" href="index.php?food=0">Order food</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="?food=0">Order drinks</a>
+                <a class="nav-link" href="index.php?food=1">Order drinks</a>
             </li>
         </ul>
     </nav>
 
     <div class="form-group">
         <div class="col-sm-10 col-sm-offset-2">
-            <?php echo $_SESSION['message'];
-            session_unset();
-            ?>
-            <?php             session_unset();
+            <?php
+            postFormvariables();
             ?>
         </div>
     </div>
@@ -67,7 +65,8 @@
 
         <fieldset>
             <legend>Products</legend>
-            <?php foreach ($products AS $i => $product): ?>
+            <?php
+            foreach (checkProducts() AS $i => $product): ?>
                 <label>
                     <input type="checkbox" value="1" name="products[<?php echo $i ?>]"/> <?php echo $product['name'] ?> -
                     &euro; <?php echo number_format($product['price'], 2) ?></label><br />
@@ -82,7 +81,7 @@
         <button type="submit" class="btn btn-primary">Order!</button>
     </form>
 
-    <footer>You already ordered <strong>&euro; <?php echo $totalValue ?></strong> in food and drinks.</footer>
+    <footer>You already ordered <strong>&euro; <?php echo calculatePrice(checkProducts()) ?></strong> in food and drinks.</footer>
 </div>
 
 <style>
