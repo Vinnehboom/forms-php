@@ -18,9 +18,8 @@ function whatIsHappening()
 }
 //your products with their price.
 
-
-
 require 'form-view.php';
+
 
 function checkProducts() {
     $products0 = [
@@ -38,8 +37,8 @@ function checkProducts() {
         ['name' => 'Ice-tea', 'price' => 3],
     ];
 
-    $products = $products1;
-    $type = $_GET['food'];
+    $products = $products0;
+    $type = $_GET["type"];
     if ($type == 0) {
         $products = $products0;
     } else if($type == 1) {
@@ -49,15 +48,23 @@ function checkProducts() {
 }
 
 function calculatePrice($array) {
-    $valueSpent = 0;
+    if(isset($_COOKIE['total_spent'])) {
+        $totalSpent = $_COOKIE['total_spent'];
+    } else {
+        $totalSpent = 0;
+    }
 
     foreach($array as $key => $product) {
-        if($_POST['products['.$key.']'] =='1') {
-            $valueSpent += $product['price'];
+        if($_POST['products'][$key] == '1') {
+            $totalSpent += $product['price'];
         }
     }
-     $_SESSION['total_spent'] = $valueSpent;
-    return $_SESSION['total_spent'];
+    if($_POST['express_delivery'] == '5') {
+        $totalSpent += 5;
+    }
+    $_COOKIE['total_spent'] = $totalSpent; // only necessary if you want to use cookie on the same page
+    setcookie('total_spent',(string)$totalSpent, time() + 3600); // won't work if cookie already exists
+    return $_COOKIE['total_spent'];
 }
 
 function calculateDelivery(){
@@ -70,8 +77,23 @@ function calculateDelivery(){
     } else {
         $currentTime = date('H:i', strtotime($currentTime. ' + 2 hours'));
     }
+    $_SESSION['delivery_time'] = $currentTime;
     echo 'Your delivery will arrive around ' . $currentTime . '.';
-    var_dump($_POST['products[0]']);
+}
+
+function sendEmail() {
+    $to = $_SESSION['email'] . ", vinnie@outpost.be";
+    $orderDate = date('D jS F, H:i');
+    $subject = 'Order confirmation - ' . $orderDate;
+    $totalPrice = $_COOKIE['total_spent'];
+    $deliveryTime = $_SESSION['delivery_time'];
+    $message = "Dear customer, " . "\r\n\n" .
+        "Through this email we would like to confirm your order from " .
+        $orderDate . " of a total price " . $totalPrice . " euros." . "\r\n\n" .
+        "It is estimated to arrive at " .
+        $deliveryTime . "." . "\r\n\n" . "Kind regards," .
+        "\n" . "The Personal Ham Processors";
+     mail($to, $subject, $message);
 
 }
 
@@ -80,6 +102,7 @@ function postFormvariables() {
         $_SESSION['error-array'] = [];
 
         $email = $_POST['email'];
+        $_SESSION['email'] = $_POST['email'];
         if (empty($email)) {
             $emailErr = "An email adress is required!";
             array_push($_SESSION['error-array'], $emailErr);
@@ -90,6 +113,7 @@ function postFormvariables() {
         }
 
         $street = $_POST['street'];
+        $_SESSION['street'] = $_POST['street'];
         if (empty($street)) {
             $streetErr = "A street name is required!";
             array_push($_SESSION['error-array'], $streetErr);
@@ -102,6 +126,7 @@ function postFormvariables() {
 
 
         $streetNumber = $_POST['streetnumber'];
+        $_SESSION['streetnumber'] = $_POST['streetnumber'];
         if (empty($streetNumber)) {
             $streetnumberErr = "A street number is required!";
             array_push($_SESSION['error-array'], $streetnumberErr);
@@ -112,6 +137,7 @@ function postFormvariables() {
         }
 
         $city = $_POST['city'];
+        $_SESSION['city'] = $_POST['city'];
         if (empty($city)) {
             $cityErr = "A city name is required!";
             array_push($_SESSION['error-array'], $cityErr);
@@ -122,6 +148,7 @@ function postFormvariables() {
         }
 
         $zip = $_POST['zipcode'];
+        $_SESSION['zipcode'] = $_POST['zipcode'];
         if (empty($zip)) {
             $zipErr = "A zip code is required!";
             array_push($_SESSION['error-array'], $zipErr);
@@ -143,7 +170,13 @@ function postFormvariables() {
         } else {
             echo "All information correctly put in, thank you! We will contact you further via email.";
             calculateDelivery();
+            calculatePrice(checkProducts());
+            sendEmail();
+
         }
     }
 }
+
+
+
 

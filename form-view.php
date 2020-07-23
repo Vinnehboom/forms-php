@@ -15,10 +15,10 @@
     <nav>
         <ul class="nav">
             <li class="nav-item">
-                <a class="nav-link active" href="index.php?food=0">Order food</a>
+                <a class="nav-link active" href="?type=0">Order food</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="index.php?food=1">Order drinks</a>
+                <a class="nav-link" href="?type=1">Order drinks</a>
             </li>
         </ul>
     </nav>
@@ -30,11 +30,11 @@
             ?>
         </div>
     </div>
-    <form method="post" action="index.php">
+    <form method="post" action="index.php?type=<?php echo $_GET['type'];?> ">
         <div class="form-row">
             <div class="form-group col-md-6">
                 <label for="email">E-mail:</label>  <span class="error">*
-                <input type="text" id="email" name="email" class="form-control" value="<?php echo $_POST['email']; ?>"/>
+                <input type="text" id="email" name="email" class="form-control" value="<?php echo $_SESSION['email']; ?>"/>
             </div>
         </div>
 
@@ -44,21 +44,21 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="street">Street:</label> <span class="error">*
-                    <input type="text" name="street" id="street" class="form-control" value="<?php echo $_POST['street']; ?>">
+                    <input type="text" name="street" id="street" class="form-control" value="<?php echo $_SESSION['street']; ?>">
                 </div>
                 <div class="form-group col-md-6">
                     <label for="streetnumber">Street number:</label> <span class="error">*
-                    <input type="text" id="streetnumber" name="streetnumber" class="form-control" value="<?php echo $_POST['streetnumber']; ?>">
+                    <input type="text" id="streetnumber" name="streetnumber" class="form-control" value="<?php echo $_SESSION['streetnumber']; ?>">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="city">City:</label> <span class="error">*
-                    <input type="text" id="city" name="city" class="form-control" value="<?php echo $_POST['city']; ?>">
+                    <input type="text" id="city" name="city" class="form-control" value="<?php echo $_SESSION['city']; ?>">
                 </div>
                 <div class="form-group col-md-6">
                     <label for="zipcode">Zipcode</label> <span class="error">*
-                    <input type="text" id="zipcode" name="zipcode" class="form-control" value="<?php echo $_POST['zipcode']; ?>">
+                    <input type="text" id="zipcode" name="zipcode" class="form-control" value="<?php echo $_SESSION['zipcode']; ?>">
                 </div>
             </div>
         </fieldset>
@@ -81,7 +81,7 @@
         <button type="submit" class="btn btn-primary">Order!</button>
     </form>
 
-    <footer>You already ordered <strong>&euro; <?php echo calculatePrice(checkProducts()) ?></strong> in food and drinks.</footer>
+    <footer>You already ordered <strong>&euro; <?php echo $_COOKIE['total_spent'] ?></strong> in food and drinks.</footer>
 </div>
 
 <style>
